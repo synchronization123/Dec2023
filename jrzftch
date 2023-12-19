@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <title>Jira Data Display</title>
+</head>
+<body>
+
+<?php
+
+// Set your Jira credentials and URL
+$jiraUrl = '<YOUR_JIRA_URL>';
+$username = '<YOUR_USERNAME>';
+$password = '<YOUR_PASSWORD>';
+$jqlQuery = '<YOUR_JQL_QUERY>';
+
+// Function to display the data
+function displayData($data) {
+    echo '<table class="table table-bordered">';
+    echo '<thead class="thead-dark"><tr><th>Reporter</th><th>Created Date</th><th>Jira ID</th><th>Summary</th><th>Status</th></tr></thead>';
+    echo '<tbody>';
+
+    foreach ($data['issues'] as $issue) {
+        echo '<tr>';
+        echo '<td>' . $issue['fields']['reporter']['displayName'] . '</td>';
+        echo '<td>' . $issue['fields']['created'] . '</td>';
+        echo '<td><a href="' . $jiraUrl . '/browse/' . $issue['key'] . '" target="_blank">' . $issue['key'] . '</a></td>';
+        echo '<td>' . $issue['fields']['summary'] . '</td>';
+        echo '<td>' . $issue['fields']['status']['name'] . '</td>';
+        echo '</tr>';
+    }
+
+    echo '</tbody></table>';
+}
+
+// Function to fetch and display data
+function fetchDataAndDisplay() {
+    global $jiraUrl, $username, $password, $jqlQuery;
+
+    // Create the Jira API URL
+    $apiUrl = "{$jiraUrl}/rest/api/2/search?jql=" . urlencode($jqlQuery);
+
+    // Set up cURL for making the API request
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_USERPWD, "{$username}:{$password}");
+
+    // Execute the API request
+    $response = curl_exec($ch);
+
+    // Check for errors
+    if (curl_errno($ch)) {
+        echo 'Curl error: ' . curl_error($ch);
+        exit;
+    }
+
+    // Close cURL session
+    curl_close($ch);
+
+    // Decode the JSON response
+    $data = json_decode($response, true);
+
+    // Check if there are issues in the response
+    if (isset($data['issues'])) {
+        displayData($data);
+    } else {
+        echo 'No issues found.';
+    }
+}
+
+// Display data initially
+fetchDataAndDisplay();
+
+?>
+
+<script>
+// Function to refresh data every 2 minutes
+function refreshData() {
+    // Reload the page
+    location.reload();
+}
+
+// Refresh data every 2 minutes (120,000 milliseconds)
+setInterval(refreshData, 120000);
+</script>
+
+</body>
+</html>
