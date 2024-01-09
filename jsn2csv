@@ -1,0 +1,20 @@
+import json
+import csv
+import requests
+import datetime
+
+url = input("Enter the URL of the JSON file: ")
+
+response = requests.get(url)
+data = json.loads(response.text)
+
+filename = datetime.date.today().strftime("%Y-%m-%d") + ".csv"
+
+with open(filename, "w") as f:
+    writer = csv.writer(f)
+    writer.writerow(data[0].keys())
+    for row in data:
+        writer.writerow(row.values())
+
+print(f"CSV file created: {filename}")
+This script
