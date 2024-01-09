@@ -1,0 +1,30 @@
+
+
+import json 
+import csv
+
+# Prompt user to enter JSON file name
+json_file = input("Enter JSON file name: ")
+
+# Load JSON file
+with open(json_file, "r") as f:
+    json_data = json.load(f)
+
+# Convert JSON to CSV
+csv_file = json_file.replace(".json", ".csv")
+with open(csv_file, "w") as f:
+    writer = csv.writer(f)
+
+    # Write header row
+    header = json_data[0].keys()
+    writer.writerow(header)
+
+    # Write data rows
+    for row in json_data:
+        writer.writerow(row.values())
+
+print("CSV file saved as", csv_file)
+This script:
+
+
+
